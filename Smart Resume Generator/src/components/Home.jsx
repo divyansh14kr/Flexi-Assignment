@@ -31,3 +31,4 @@ function Home(){
         </form>
     </div>
 }
+export default Home
