@@ -17,7 +17,7 @@ function Home(){
             currentPostiion,
             currentLength,
             currentStack,
-            imagex
+            image
         })
     }
 
