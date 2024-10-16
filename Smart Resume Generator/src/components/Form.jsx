@@ -1,109 +1,223 @@
 import React, { useState } from 'react';
+import html2pdf from 'html2pdf.js/dist/html2pdf.bundle.min';
 
-const Form = () => {
-    const [name, setName] = useState('');
-    const [email, setEmail] = useState('');
-    const [countryCode, setCountryCode] = useState('+91');
-    const [phone, setPhone] = useState('');
-    const [profileImage, setProfileImage] = useState(null);
-    const [aboutMe, setAboutMe] = useState('');
-    const [skills, setSkills] = useState([]);
-    const [skillInput, setSkillInput] = useState('');
-    const [experiences, setExperiences] = useState([]);
-    const [companyInput, setCompanyInput] = useState('');
-    const [positionInput, setPositionInput] = useState('');
-    const [durationInput, setDurationInput] = useState('');
 
-    const handleAddSkill = () => {
-        if (skillInput.trim()) {
-            setSkills([...skills, skillInput]);
-            setSkillInput('');
-        }
-    };
 
-    const handleRemoveSkill = (skillToRemove) => {
-        setSkills(skills.filter(skill => skill !== skillToRemove));
-    };
+function SmartResumeGenerator() {
+  const [skills, setSkills] = useState([]);
+  const [experiences, setExperiences] = useState([]);
+  const [educations, setEducations] = useState([]);
+  const [resumeData, setResumeData] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    countryCode: '+91',
+    aboutMe: '',
+    profileImage: null,
+  });
 
-    const handleAddExperience = () => {
-        if (companyInput.trim() && positionInput.trim() && durationInput.trim()) {
-            const experience = { company: companyInput, position: positionInput, duration: durationInput };
-            setExperiences([...experiences, experience]);
-            setCompanyInput('');
-            setPositionInput('');
-            setDurationInput('');
-        }
-    };
+  const handleInputChange = (e) => {
+    const { name, value, files } = e.target;
+    setResumeData((prevData) => ({
+      ...prevData,
+      [name]: files ? files[0] : value,
+    }));
+  };
 
-    const handleRemoveExperience = (companyToRemove) => {
-        setExperiences(experiences.filter(exp => exp.company !== companyToRemove));
-    };
+  const handleAddSkill = () => {
+    const skill = document.getElementById('skillInput').value.trim();
+    if (skill) {
+      setSkills([...skills, skill]);
+      document.getElementById('skillInput').value = '';
+    }
+  };
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        // Handle form submission logic here
-    };
+  const handleAddExperience = () => {
+    const company = document.getElementById('companyInput').value.trim();
+    const position = document.getElementById('positionInput').value.trim();
+    const duration = document.getElementById('durationInput').value.trim();
 
-    return (
-        <div className="p-6 bg-gray-100">
-            <h1 className="text-center text-2xl font-bold mb-6">Smart Resume Generator</h1>
-            <form id="resumeForm" onSubmit={handleSubmit} className="max-w-lg mx-auto bg-white p-6 rounded-lg shadow-lg">
-                <label htmlFor="name" className="block font-bold mb-2">Name <span className="text-red-500">*</span>:</label>
-                <input type="text" id="name" name="name" placeholder="Enter your full name" value={name} onChange={(e) => setName(e.target.value)} required className="w-full p-2 border border-gray-300 rounded mb-4" />
+    if (company && position && duration) {
+      const experience = { company, position, duration };
+      setExperiences([...experiences, experience]);
+      document.getElementById('companyInput').value = '';
+      document.getElementById('positionInput').value = '';
+      document.getElementById('durationInput').value = '';
+    }
+  };
 
-                <label htmlFor="email" className="block font-bold mb-2">Email <span className="text-red-500">*</span>:</label>
-                <input type="email" id="email" name="email" placeholder="Enter your email address" value={email} onChange={(e) => setEmail(e.target.value)} required className="w-full p-2 border border-gray-300 rounded mb-4" />
+  const handleAddEducation = () => {
+    const college = document.getElementById('collegeInput').value.trim();
+    const degree = document.getElementById('degreeInput').value;
+    const course = document.getElementById('courseInput').value.trim();
+    const startDate = document.getElementById('startDateInput').value;
+    const endDate = document.getElementById('endDateInput').value;
+    const cgpa = document.getElementById('cgpaInput').value.trim();
 
-                <label htmlFor="phone" className="block font-bold mb-2">Phone Number <span className="text-red-500">*</span>:</label>
-                <div className="flex mb-4">
-                    <select id="countryCode" name="countryCode" value={countryCode} onChange={(e) => setCountryCode(e.target.value)} required className="w-1/4 p-2 border border-gray-300 rounded-l">
-                        <option value="+91">+91 (India)</option>
-                        <option value="+1">+1 (USA)</option>
-                        <option value="+44">+44 (UK)</option>
-                        <option value="+61">+61 (Australia)</option>
-                        <option value="+81">+81 (Japan)</option>
-                    </select>
-                    <input type="tel" id="phone" name="phone" placeholder="Enter your phone number" value={phone} onChange={(e) => setPhone(e.target.value)} required pattern="[0-9]{10}" title="Please enter a 10-digit phone number." className="w-3/4 p-2 border border-gray-300 rounded-r" />
-                </div>
+    if (college && degree && course && startDate && endDate && cgpa) {
+      const education = { college, degree, course, startDate, endDate, cgpa };
+      setEducations([...educations, education]);
 
-                <label htmlFor="profileImage" className="block font-bold mb-2">Upload Profile Image <span className="text-red-500">*</span>:</label>
-                <input type="file" id="profileImage" name="profileImage" accept="image/*" onChange={(e) => setProfileImage(e.target.files[0])} required className="mb-4" />
+      document.getElementById('collegeInput').value = '';
+      document.getElementById('degreeInput').value = '';
+      document.getElementById('courseInput').value = '';
+      document.getElementById('startDateInput').value = '';
+      document.getElementById('endDateInput').value = '';
+      document.getElementById('cgpaInput').value = '';
+    }
+  };
 
-                <label htmlFor="aboutMe" className="block font-bold mb-2">About Yourself:</label>
-                <textarea id="aboutMe" name="aboutMe" placeholder="Enter a few lines about yourself" rows="4" value={aboutMe} onChange={(e) => setAboutMe(e.target.value)} required className="w-full p-2 border border-gray-300 rounded mb-4"></textarea>
+  const handleGenerateResume = () => {
+    const { name, email, phone, countryCode, aboutMe, profileImage } = resumeData;
 
-                <label htmlFor="skills" className="block font-bold mb-2">Skills:</label>
-                <div className="flex mb-4">
-                    <input type="text" id="skillInput" placeholder="Enter a skill" value={skillInput} onChange={(e) => setSkillInput(e.target.value)} className="flex-grow p-2 border border-gray-300 rounded-l" />
-                    <button type="button" onClick={handleAddSkill} className="bg-blue-500 text-white p-2 rounded-r hover:bg-blue-600">+</button>
-                </div>
-                <ul id="skillList" className="list-none p-0">
-                    {skills.map((skill, index) => (
-                        <li key={index} className="bg-gray-200 p-2 rounded mb-2 flex justify-between">
-                            {skill} <span className="text-red-500 cursor-pointer" onClick={() => handleRemoveSkill(skill)}>x</span>
-                        </li>
-                    ))}
-                </ul>
+    if (!name || !email || !phone || !aboutMe) {
+      alert('Please fill all the required fields.');
+      return;
+    }
 
-                <label htmlFor="workExperience" className="block font-bold mb-2">Work Experience:</label>
-                <div className="flex mb-4">
-                    <input type="text" placeholder="Company Name" value={companyInput} onChange={(e) => setCompanyInput(e.target.value)} className="flex-grow p-2 border border-gray-300 rounded-l" />
-                    <input type="text" placeholder="Position Held" value={positionInput} onChange={(e) => setPositionInput(e.target.value)} className="flex-grow p-2 border border-gray-300" />
-                    <input type="text" placeholder="Duration" value={durationInput} onChange={(e) => setDurationInput(e.target.value)} className="flex-grow p-2 border border-gray-300 rounded-r" />
-                    <button type="button" onClick={handleAddExperience} className="bg-blue-500 text-white p-2 rounded hover:bg-blue-600">+</button>
-                </div>
-                <ul id="experienceList" className="list-none p-0">
-                    {experiences.map((exp, index) => (
-                        <li key={index} className="bg-gray-200 p-2 rounded mb-2 flex justify-between">
-                            Worked at {exp.company}, as a {exp.position}, for {exp.duration} years. <span className="text-red-500 cursor-pointer" onClick={() => handleRemoveExperience(exp.company)}>x</span>
-                        </li>
-                    ))}
-                </ul>
+    let resumeContent = `<h2>${name}</h2>
+      <p>Email: ${email}</p>
+      <p>Phone: ${countryCode} ${phone}</p>
+      <h3>About Me</h3>
+      <p>${aboutMe}</p>
+      <h3>Skills</h3><ul>`;
 
-                <button type="submit" className="w-full bg-green-500 text-white p-2 rounded hover:bg-green-600 mt-4">Generate Resume</button>
-            </form>
+    skills.forEach((skill) => {
+      resumeContent += `<li>${skill}</li>`;
+    });
+
+    resumeContent += `</ul><h3>Work Experience</h3><ul>`;
+
+    experiences.forEach((exp) => {
+      resumeContent += `<li>Worked as ${exp.position} at ${exp.company} for ${exp.duration} years.</li>`;
+    });
+
+    resumeContent += `</ul><h3>Education</h3><ul>`;
+
+    educations.forEach((edu) => {
+      resumeContent += `<li class="education-item">
+            <div class="education-info">
+              <p><strong>${edu.college}</strong>
+              <p>${edu.degree} of ${edu.course}</p>
+            </div>
+            <div class="education-details">
+              <p>${edu.startDate} - ${edu.endDate}</p>
+              <p>CGPA: ${edu.cgpa}</p>
+            </div>
+          </li>`;
+    });
+
+    resumeContent += `</ul>`;
+
+    document.getElementById('generatedResume').innerHTML = resumeContent;
+
+    if (profileImage) {
+      const img = document.createElement('img');
+      img.src = URL.createObjectURL(profileImage);
+      img.alt = 'Profile Image';
+      img.style.width = '30%';
+      img.style.maxWidth = '300px';
+      img.style.maxHeight = '400px';
+      img.style.borderRadius = '10px';
+      img.style.border = '2px solid #ccc';
+      document.getElementById('generatedResume').prepend(img);
+    }
+
+    document.getElementById('generatedResume').style.display = 'block';
+    document.getElementById('downloadResumeBtn').style.display = 'inline-block';
+  };
+
+  const handleDownloadResume = () => {
+    const element = document.getElementById('generatedResume');
+    html2pdf().from(element).save('resume.pdf');
+  };
+
+  return (
+    <div>
+      <h1>Smart Resume Generator</h1>
+
+      <form id="resumeForm">
+        <label htmlFor="name">Name <span style={{ color: 'red' }}>*</span>:</label>
+        <input type="text" id="name" name="name" placeholder="Enter your full name" onChange={handleInputChange} required />
+
+        <label htmlFor="email">Email <span style={{ color: 'red' }}>*</span>:</label>
+        <input type="email" id="email" name="email" placeholder="Enter your email address" onChange={handleInputChange} required />
+
+        <label htmlFor="phone">Phone Number <span style={{ color: 'red' }}>*</span>:</label>
+        <div className="phone-container">
+          <select id="countryCode" name="countryCode" onChange={handleInputChange} required>
+            <option value="+91">+91 (India)</option>
+            <option value="+1">+1 (USA)</option>
+            <option value="+44">+44 (UK)</option>
+            <option value="+61">+61 (Australia)</option>
+            <option value="+81">+81 (Japan)</option>
+          </select>
+          <input type="tel" id="phone" name="phone" placeholder="Enter your phone number" onChange={handleInputChange} required />
         </div>
-    );
-};
 
-export default Form;
+        <label htmlFor="profileImage">Upload Profile Image <span style={{ color: 'red' }}>*</span>:</label>
+        <input type="file" id="profileImage" name="profileImage" accept="image/*" onChange={handleInputChange} required />
+
+        <label htmlFor="aboutMe">About Yourself:</label>
+        <textarea id="aboutMe" name="aboutMe" placeholder="Enter a few lines about yourself" onChange={handleInputChange} rows="4" required />
+
+        <label htmlFor="skills">Skills:</label>
+        <div className="skills-container">
+          <input type="text" id="skillInput" placeholder="Enter a skill" />
+          <button type="button" onClick={handleAddSkill}>+</button>
+        </div>
+        <ul id="skillList" className="skill-list">
+          {skills.map((skill, index) => (
+            <li key={index}>{skill} <span onClick={() => setSkills(skills.filter((s) => s !== skill))}>x</span></li>
+          ))}
+        </ul>
+
+        <label htmlFor="workExperience">Work Experience:</label>
+        <div className="experience-container">
+          <input type="text" placeholder="Company Name" id="companyInput" />
+          <input type="text" placeholder="Position Held" id="positionInput" />
+          <input type="text" placeholder="Duration" id="durationInput" />
+          <button type="button" onClick={handleAddExperience}>+</button>
+        </div>
+        <ul id="experienceList" className="experience-list">
+          {experiences.map((exp, index) => (
+            <li key={index}>
+              Worked as {exp.position} at {exp.company} for {exp.duration} years. <span onClick={() => setExperiences(experiences.filter((e) => e.company !== exp.company))}>x</span>
+            </li>
+          ))}
+        </ul>
+
+        <h2>Education</h2>
+        <input type="text" placeholder="Enter College/University Name" id="collegeInput" required />
+        <select id="degreeInput" required>
+          <option value="">Select Degree</option>
+          <option value="Associate">Associate degree</option>
+          <option value="Bachelor">Bachelor's degree</option>
+          <option value="Master">Master's degree</option>
+          <option value="Doctoral">Doctoral degree</option>
+        </select>
+
+        <input type="text" placeholder="Enter Course Name" id="courseInput" required />
+        <input type="date" id="startDateInput" placeholder="Start Date" required />
+        <input type="date" id="endDateInput" placeholder="End Date" required />
+        <input type="text" placeholder="Enter CGPA" id="cgpaInput" required />
+        <button type="button" onClick={handleAddEducation}>Add Education</button>
+        <ul id="educationList" className="education-list">
+          {educations.map((edu, index) => (
+            <li key={index}>
+              <strong>{edu.college}</strong> - {edu.degree} of {edu.course}. {edu.startDate} to {edu.endDate}. CGPA: {edu.cgpa}.
+              <span onClick={() => setEducations(educations.filter((e) => e.college !== edu.college))}>x</span>
+            </li>
+          ))}
+        </ul>
+
+        <button type="button" id="generateResumeBtn" onClick={handleGenerateResume}>Generate Resume</button>
+      </form>
+
+      <div id="generatedResume" style={{ display: 'none' }}></div>
+      <button type="button" id="downloadResumeBtn" onClick={handleDownloadResume} style={{ display: 'none' }}>Download PDF</button>
+    </div>
+  );
+}
+
+export default SmartResumeGenerator;
