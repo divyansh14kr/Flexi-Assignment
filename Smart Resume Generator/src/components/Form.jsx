@@ -1,223 +1,262 @@
 import React, { useState } from 'react';
 import html2pdf from 'html2pdf.js/dist/html2pdf.bundle.min';
+import './Form.css';
 
+const SmartResumeGenerator = () => {
+    const [skills, setSkills] = useState([]);
+    const [experiences, setExperiences] = useState([]);
+    const [educations, setEducations] = useState([]);
+    const [projects, setProjects] = useState([]);
+    const [resumeContent, setResumeContent] = useState('');
+    const [profileImage, setProfileImage] = useState(null);
 
+    const handleAddSkill = (e) => {
+        e.preventDefault();
+        const skillInput = document.getElementById('skillInput');
+        const skill = skillInput.value.trim();
+        if (skill) {
+            setSkills([...skills, skill]);
+            skillInput.value = '';
+        }
+    };
 
-function SmartResumeGenerator() {
-  const [skills, setSkills] = useState([]);
-  const [experiences, setExperiences] = useState([]);
-  const [educations, setEducations] = useState([]);
-  const [resumeData, setResumeData] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    countryCode: '+91',
-    aboutMe: '',
-    profileImage: null,
-  });
+    const handleRemoveSkill = (skillToRemove) => {
+        setSkills(skills.filter(skill => skill !== skillToRemove));
+    };
 
-  const handleInputChange = (e) => {
-    const { name, value, files } = e.target;
-    setResumeData((prevData) => ({
-      ...prevData,
-      [name]: files ? files[0] : value,
-    }));
-  };
+    const handleAddExperience = (e) => {
+        e.preventDefault();
+        const companyInput = document.getElementById('companyInput');
+        const positionInput = document.getElementById('positionInput');
+        const durationInput = document.getElementById('durationInput');
+        const company = companyInput.value.trim();
+        const position = positionInput.value.trim();
+        const duration = durationInput.value.trim();
 
-  const handleAddSkill = () => {
-    const skill = document.getElementById('skillInput').value.trim();
-    if (skill) {
-      setSkills([...skills, skill]);
-      document.getElementById('skillInput').value = '';
-    }
-  };
+        if (company && position && duration) {
+            setExperiences([...experiences, { company, position, duration }]);
+            companyInput.value = '';
+            positionInput.value = '';
+            durationInput.value = '';
+        }
+    };
 
-  const handleAddExperience = () => {
-    const company = document.getElementById('companyInput').value.trim();
-    const position = document.getElementById('positionInput').value.trim();
-    const duration = document.getElementById('durationInput').value.trim();
+    const handleRemoveExperience = (companyToRemove) => {
+        setExperiences(experiences.filter(exp => exp.company !== companyToRemove));
+    };
 
-    if (company && position && duration) {
-      const experience = { company, position, duration };
-      setExperiences([...experiences, experience]);
-      document.getElementById('companyInput').value = '';
-      document.getElementById('positionInput').value = '';
-      document.getElementById('durationInput').value = '';
-    }
-  };
+    const handleAddEducation = (e) => {
+        e.preventDefault();
+        const collegeInput = document.getElementById('collegeInput');
+        const degreeInput = document.getElementById('degreeInput');
+        const courseInput = document.getElementById('courseInput');
+        const startDateInput = document.getElementById('startDateInput');
+        const endDateInput = document.getElementById('endDateInput');
+        const cgpaInput = document.getElementById('cgpaInput');
+        const college = collegeInput.value.trim();
+        const degree = degreeInput.value;
+        const course = courseInput.value.trim();
+        const startDate = startDateInput.value;
+        const endDate = endDateInput.value;
+        const cgpa = cgpaInput.value.trim();
 
-  const handleAddEducation = () => {
-    const college = document.getElementById('collegeInput').value.trim();
-    const degree = document.getElementById('degreeInput').value;
-    const course = document.getElementById('courseInput').value.trim();
-    const startDate = document.getElementById('startDateInput').value;
-    const endDate = document.getElementById('endDateInput').value;
-    const cgpa = document.getElementById('cgpaInput').value.trim();
+        if (college && degree && course && startDate && endDate && cgpa) {
+            setEducations([...educations, { college, degree, course, startDate, endDate, cgpa }]);
+            collegeInput.value = '';
+            degreeInput.value = '';
+            courseInput.value = '';
+            startDateInput.value = '';
+            endDateInput.value = '';
+            cgpaInput.value = '';
+        }
+    };
 
-    if (college && degree && course && startDate && endDate && cgpa) {
-      const education = { college, degree, course, startDate, endDate, cgpa };
-      setEducations([...educations, education]);
+    const handleAddProject = (e) => {
+        e.preventDefault();
+        const projectNameInput = document.getElementById('projectNameInput');
+        const projectDescriptionInput = document.getElementById('projectDescriptionInput');
+        const projectName = projectNameInput.value.trim();
+        const projectDescription = projectDescriptionInput.value.trim();
 
-      document.getElementById('collegeInput').value = '';
-      document.getElementById('degreeInput').value = '';
-      document.getElementById('courseInput').value = '';
-      document.getElementById('startDateInput').value = '';
-      document.getElementById('endDateInput').value = '';
-      document.getElementById('cgpaInput').value = '';
-    }
-  };
+        if (projectName && projectDescription) {
+            setProjects([...projects, { projectName, projectDescription }]);
+            projectNameInput.value = '';
+            projectDescriptionInput.value = '';
+        }
+    };
 
-  const handleGenerateResume = () => {
-    const { name, email, phone, countryCode, aboutMe, profileImage } = resumeData;
+    const handleRemoveProject = (projectToRemove) => {
+        setProjects(projects.filter(proj => proj.projectName !== projectToRemove));
+    };
 
-    if (!name || !email || !phone || !aboutMe) {
-      alert('Please fill all the required fields.');
-      return;
-    }
+    const generateResume = () => {
+        const name = document.getElementById('name').value;
+        const email = document.getElementById('email').value;
+        const countryCode = document.getElementById('countryCode').value;
+        const phone = document.getElementById('phone').value;
+        const aboutMe = document.getElementById('aboutMe').value;
 
-    let resumeContent = `<h2>${name}</h2>
-      <p>Email: ${email}</p>
-      <p>Phone: ${countryCode} ${phone}</p>
-      <h3>About Me</h3>
-      <p>${aboutMe}</p>
-      <h3>Skills</h3><ul>`;
+        if (!name || !email || !phone || !aboutMe) {
+            alert("Please fill all the required fields.");
+            return;
+        }
 
-    skills.forEach((skill) => {
-      resumeContent += `<li>${skill}</li>`;
-    });
+        let resumeHTML = `<h2>${name}</h2>
+            <p>Email: ${email}</p>
+            <p>Phone: ${countryCode} ${phone}</p>
+            <h3>About Me</h3>
+            <p>${aboutMe}</p>
+            <h3>Skills</h3><ul>`;
 
-    resumeContent += `</ul><h3>Work Experience</h3><ul>`;
+        skills.forEach(skill => {
+            resumeHTML += `<li>${skill}</li>`;
+        });
 
-    experiences.forEach((exp) => {
-      resumeContent += `<li>Worked as ${exp.position} at ${exp.company} for ${exp.duration} years.</li>`;
-    });
+        resumeHTML += `</ul><h3>Work Experience</h3><ul>`;
 
-    resumeContent += `</ul><h3>Education</h3><ul>`;
+        experiences.forEach(exp => {
+            resumeHTML += `<li>Worked as ${exp.position} at ${exp.company} for ${exp.duration} years.</li>`;
+        });
 
-    educations.forEach((edu) => {
-      resumeContent += `<li class="education-item">
-            <div class="education-info">
-              <p><strong>${edu.college}</strong>
-              <p>${edu.degree} of ${edu.course}</p>
+        resumeHTML += `</ul><h3>Education</h3><ul>`;
+
+        educations.forEach(edu => {
+            resumeHTML += `<li>Studied ${edu.course} at ${edu.college} (${edu.degree}), from ${edu.startDate} to ${edu.endDate}, CGPA: ${edu.cgpa}.</li>`;
+        });
+
+        resumeHTML += `</ul><h3>Projects</h3><ul>`;
+
+        projects.forEach(project => {
+            resumeHTML += `<li><strong>${project.projectName}</strong><br><span>${project.projectDescription}</span></li>`;
+        });
+
+        resumeHTML += `</ul>`;
+
+        setResumeContent(resumeHTML);
+
+        // Handle profile image
+        const imageInput = document.getElementById('profileImage');
+        if (imageInput.files[0]) {
+            setProfileImage(URL.createObjectURL(imageInput.files[0]));
+        }
+    };
+
+    const downloadResume = () => {
+        const element = document.getElementById('generatedResume');
+        html2pdf().from(element).save('resume.pdf');
+    };
+
+    return (
+        <div>
+            <h1>Smart Resume Generator</h1>
+            <form id="resumeForm">
+                <label htmlFor="name">Name <span style={{ color: 'red' }}>*</span>:</label>
+                <input type="text" id="name" name="name" placeholder="Enter your full name" required />
+
+                <label htmlFor="email">Email <span style={{ color: 'red' }}>*</span>:</label>
+                <input type="email" id="email" name="email" placeholder="Enter your email address" required />
+
+                <label htmlFor="phone">Phone Number <span style={{ color: 'red' }}>*</span>:</label>
+                <div className="phone-container">
+                    <select id="countryCode" name="countryCode" required>
+                        <option value="+91" className="india">+91 (India)</option>
+                        <option value="+1" className="usa">+1 (USA)</option>
+                        <option value="+44" className="uk">+44 (UK)</option>
+                        <option value="+61" className="australia">+61 (Australia)</option>
+                        <option value="+81" className="japan">+81 (Japan)</option>
+                    </select>
+                    <input type="tel" id="phone" name="phone" placeholder="Enter your phone number" required pattern="[0-9]{10}" title="Please enter a 10-digit phone number." />
+                </div>
+
+                <label htmlFor="profileImage">Upload Profile Image <span style={{ color: 'red' }}>*</span>:</label>
+                <input type="file" id="profileImage" name="profileImage" accept="image/*" required onChange={(e) => setProfileImage(e.target.files[0])} />
+
+                <label htmlFor="aboutMe">About Yourself:</label>
+                <textarea id="aboutMe" name="aboutMe" placeholder="Enter a few lines about yourself" rows="4" required></textarea>
+
+                {/* Skills Section */}
+                <label htmlFor="skills">Skills:</label>
+                <div className="skills-container">
+                    <input type="text" id="skillInput" placeholder="Enter a skill" />
+                    <button type="button" id="addSkill" onClick={handleAddSkill}>+</button>
+                </div>
+                <ul id="skillList" className="skill-list">
+                    {skills.map(skill => (
+                        <li key={skill}>
+                            {skill} <span className="remove-skill" onClick={() => handleRemoveSkill(skill)}>x</span>
+                        </li>
+                    ))}
+                </ul>
+
+                {/* Work Experience Section */}
+                <label htmlFor="workExperience">Work Experience:</label>
+                <div className="experience-container">
+                    <input type="text" placeholder="Company Name" id="companyInput" />
+                    <input type="text" placeholder="Position Held" id="positionInput" />
+                    <input type="text" placeholder="Duration (in years)" id="durationInput" />
+                    <button type="button" id="addExperience" onClick={handleAddExperience}>+</button>
+                </div>
+                <ul id="experienceList" className="experience-list">
+                    {experiences.map(exp => (
+                        <li key={exp.company}>
+                            Worked as {exp.position} at {exp.company} for {exp.duration} years.
+                            <span className="remove-experience" onClick={() => handleRemoveExperience(exp.company)}>x</span>
+                        </li>
+                    ))}
+                </ul>
+
+                {/* Education Section */}
+                <label htmlFor="education">Education:</label>
+                <div className="education-container">
+                    <input type="text" placeholder="College/University" id="collegeInput" />
+                    <select id="degreeInput">
+                        <option value="">Select Degree</option>
+                        <option value="Bachelors">Bachelors</option>
+                        <option value="Masters">Masters</option>
+                        <option value="PhD">PhD</option>
+                    </select>
+                    <input type="text" placeholder="Course" id="courseInput" />
+                    <input type="text" placeholder="Start Date" id="startDateInput" />
+                    <input type="text" placeholder="End Date" id="endDateInput" />
+                    <input type="text" placeholder="CGPA" id="cgpaInput" />
+                    <button type="button" id="addEducation" onClick={handleAddEducation}>+</button>
+                </div>
+                <ul id="educationList" className="education-list">
+                    {educations.map(edu => (
+                        <li key={edu.college}>
+                            Studied {edu.course} at {edu.college} ({edu.degree}), from {edu.startDate} to {edu.endDate}, CGPA: {edu.cgpa}.
+                        </li>
+                    ))}
+                </ul>
+
+                {/* Projects Section */}
+                <label htmlFor="projects">Projects:</label>
+                <div className="projects-container">
+                    <input type="text" placeholder="Project Name" id="projectNameInput" />
+                    <textarea placeholder="Project Description" id="projectDescriptionInput"></textarea>
+                    <button type="button" id="addProject" onClick={handleAddProject}>+</button>
+                </div>
+                <ul id="projectList" className="project-list">
+                    {projects.map(project => (
+                        <li key={project.projectName}>
+                            <strong>{project.projectName}</strong><br />
+                            <span>{project.projectDescription}</span>
+                            <span className="remove-project" onClick={() => handleRemoveProject(project.projectName)}>x</span>
+                        </li>
+                    ))}
+                </ul>
+
+                <button type="button" id="generateResume" onClick={generateResume}>Generate Resume</button>
+            </form>
+
+            <div id="generatedResume" style={{ display: resumeContent ? 'block' : 'none' }}>
+                <h2>Resume</h2>
+                {profileImage && <img src={profileImage} alt="Profile" style={{ width: '100px', height: '100px' }} />}
+                <div dangerouslySetInnerHTML={{ __html: resumeContent }} />
+                <button onClick={downloadResume}>Download PDF</button>
             </div>
-            <div class="education-details">
-              <p>${edu.startDate} - ${edu.endDate}</p>
-              <p>CGPA: ${edu.cgpa}</p>
-            </div>
-          </li>`;
-    });
-
-    resumeContent += `</ul>`;
-
-    document.getElementById('generatedResume').innerHTML = resumeContent;
-
-    if (profileImage) {
-      const img = document.createElement('img');
-      img.src = URL.createObjectURL(profileImage);
-      img.alt = 'Profile Image';
-      img.style.width = '30%';
-      img.style.maxWidth = '300px';
-      img.style.maxHeight = '400px';
-      img.style.borderRadius = '10px';
-      img.style.border = '2px solid #ccc';
-      document.getElementById('generatedResume').prepend(img);
-    }
-
-    document.getElementById('generatedResume').style.display = 'block';
-    document.getElementById('downloadResumeBtn').style.display = 'inline-block';
-  };
-
-  const handleDownloadResume = () => {
-    const element = document.getElementById('generatedResume');
-    html2pdf().from(element).save('resume.pdf');
-  };
-
-  return (
-    <div>
-      <h1>Smart Resume Generator</h1>
-
-      <form id="resumeForm">
-        <label htmlFor="name">Name <span style={{ color: 'red' }}>*</span>:</label>
-        <input type="text" id="name" name="name" placeholder="Enter your full name" onChange={handleInputChange} required />
-
-        <label htmlFor="email">Email <span style={{ color: 'red' }}>*</span>:</label>
-        <input type="email" id="email" name="email" placeholder="Enter your email address" onChange={handleInputChange} required />
-
-        <label htmlFor="phone">Phone Number <span style={{ color: 'red' }}>*</span>:</label>
-        <div className="phone-container">
-          <select id="countryCode" name="countryCode" onChange={handleInputChange} required>
-            <option value="+91">+91 (India)</option>
-            <option value="+1">+1 (USA)</option>
-            <option value="+44">+44 (UK)</option>
-            <option value="+61">+61 (Australia)</option>
-            <option value="+81">+81 (Japan)</option>
-          </select>
-          <input type="tel" id="phone" name="phone" placeholder="Enter your phone number" onChange={handleInputChange} required />
         </div>
-
-        <label htmlFor="profileImage">Upload Profile Image <span style={{ color: 'red' }}>*</span>:</label>
-        <input type="file" id="profileImage" name="profileImage" accept="image/*" onChange={handleInputChange} required />
-
-        <label htmlFor="aboutMe">About Yourself:</label>
-        <textarea id="aboutMe" name="aboutMe" placeholder="Enter a few lines about yourself" onChange={handleInputChange} rows="4" required />
-
-        <label htmlFor="skills">Skills:</label>
-        <div className="skills-container">
-          <input type="text" id="skillInput" placeholder="Enter a skill" />
-          <button type="button" onClick={handleAddSkill}>+</button>
-        </div>
-        <ul id="skillList" className="skill-list">
-          {skills.map((skill, index) => (
-            <li key={index}>{skill} <span onClick={() => setSkills(skills.filter((s) => s !== skill))}>x</span></li>
-          ))}
-        </ul>
-
-        <label htmlFor="workExperience">Work Experience:</label>
-        <div className="experience-container">
-          <input type="text" placeholder="Company Name" id="companyInput" />
-          <input type="text" placeholder="Position Held" id="positionInput" />
-          <input type="text" placeholder="Duration" id="durationInput" />
-          <button type="button" onClick={handleAddExperience}>+</button>
-        </div>
-        <ul id="experienceList" className="experience-list">
-          {experiences.map((exp, index) => (
-            <li key={index}>
-              Worked as {exp.position} at {exp.company} for {exp.duration} years. <span onClick={() => setExperiences(experiences.filter((e) => e.company !== exp.company))}>x</span>
-            </li>
-          ))}
-        </ul>
-
-        <h2>Education</h2>
-        <input type="text" placeholder="Enter College/University Name" id="collegeInput" required />
-        <select id="degreeInput" required>
-          <option value="">Select Degree</option>
-          <option value="Associate">Associate degree</option>
-          <option value="Bachelor">Bachelor's degree</option>
-          <option value="Master">Master's degree</option>
-          <option value="Doctoral">Doctoral degree</option>
-        </select>
-
-        <input type="text" placeholder="Enter Course Name" id="courseInput" required />
-        <input type="date" id="startDateInput" placeholder="Start Date" required />
-        <input type="date" id="endDateInput" placeholder="End Date" required />
-        <input type="text" placeholder="Enter CGPA" id="cgpaInput" required />
-        <button type="button" onClick={handleAddEducation}>Add Education</button>
-        <ul id="educationList" className="education-list">
-          {educations.map((edu, index) => (
-            <li key={index}>
-              <strong>{edu.college}</strong> - {edu.degree} of {edu.course}. {edu.startDate} to {edu.endDate}. CGPA: {edu.cgpa}.
-              <span onClick={() => setEducations(educations.filter((e) => e.college !== edu.college))}>x</span>
-            </li>
-          ))}
-        </ul>
-
-        <button type="button" id="generateResumeBtn" onClick={handleGenerateResume}>Generate Resume</button>
-      </form>
-
-      <div id="generatedResume" style={{ display: 'none' }}></div>
-      <button type="button" id="downloadResumeBtn" onClick={handleDownloadResume} style={{ display: 'none' }}>Download PDF</button>
-    </div>
-  );
-}
+    );
+};
 
 export default SmartResumeGenerator;
