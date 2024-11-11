@@ -39,5 +39,5 @@ app.use((err, req, res, next) => {
 
 app.listen(process.env.PORT, () => {
     //  console.log(`Server is working on https://resume-builder-mern-eight.vercel.app:${process.env.PORT}`);
-    console.log(`Server is running on port ${PORT}`);
+    console.log(`Server is working on ${process.env.PORT}`);
 });
